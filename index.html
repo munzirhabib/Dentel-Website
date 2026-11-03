@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <h1>Healthy teeth,<br>no waiting.</h1>
+  <p>Checkup se root canal tak, sab ek jagah. Online appointment book karein.</p>
+  <a class="btn" href="{{ url_for('book') }}">Book appointment</a>
+</section>
+
+<section>
+  <h2>Our services</h2>
+  <div class="services">
+    {% for s in services %}
+    <article class="service">
+      <h3>{{ s.name }}</h3>
+      <p>{{ s.info }}</p>
+      <strong>Rs {{ s.price }}</strong>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

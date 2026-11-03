@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Book | Smile Dental{% endblock %}
+{% block content %}
+<h2>Book an appointment</h2>
+<form method="post" id="bookForm" class="form">
+  <label>Patient name
+    <input name="patient" required minlength="2">
+  </label>
+  <label>Phone
+    <input name="phone" required pattern="[0-9+ -]{10,15}" placeholder="03xx xxxxxxx">
+  </label>
+  <label>Date
+    <input type="date" name="date" id="date" required>
+  </label>
+  <label>Service
+    <select name="service_id" id="service" required>
+      {% for s in services %}
+      <option value="{{ s.id }}" data-price="{{ s.price }}">{{ s.name }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <p id="price" class="price"></p>
+  <button class="btn" type="submit">Confirm booking</button>
+</form>
+{% endblock %}
