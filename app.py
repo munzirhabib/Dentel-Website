@@ -1,9 +1,9 @@
 """
 Smile Dental Clinic - single file website
-Language : Python (backend), HTML (pages), CSS (shakal), JavaScript (browser), SQL (database)
+Language : Python (backend), HTML (pages), CSS (styling), JavaScript (browser), SQL (database)
 Framework: Flask
-Database : SQLite (relational): services, appointments (jude hue), messages
-Server   : Vercel par chalta hai (client = browser, server = Vercel)
+Database : SQLite (relational): services, appointments (linked), messages
+Server   : Runs on Vercel (client = browser, server = Vercel)
 """
 import os
 import sqlite3
@@ -14,7 +14,7 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify
 BASE = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__, static_folder=None)
 
-# Vercel par sirf /tmp likhne ke qabil hai (aur wo temporary hai)
+# On Vercel only /tmp is writable (and it is temporary)
 DB = "/tmp/clinic.db" if os.environ.get("VERCEL") else os.path.join(BASE, "clinic.db")
 
 # ---------------- DATABASE ----------------
@@ -42,11 +42,11 @@ CREATE TABLE IF NOT EXISTS messages (
 """
 
 SERVICES = [
-    ("Checkup", 1000, "Poore daanton aur masoodon ka mukammal muaina."),
-    ("Scaling", 3000, "Daanton ki gehri safai, plaque aur peeli tah ka khatma."),
-    ("Filling", 4000, "Cavity ki safai aur mazboot, qudrati rang ki filling."),
-    ("Root Canal", 15000, "Dard ke baghair nerve ka ilaaj, dant ko bachane ke liye."),
-    ("Whitening", 12000, "Ek hi visit mein daanton ko kai shade chamkana."),
+    ("Checkup", 1000, "A complete examination of your teeth and gums."),
+    ("Scaling", 3000, "Deep cleaning that removes plaque and yellow buildup."),
+    ("Filling", 4000, "Cavity cleaning with a strong, natural-looking filling."),
+    ("Root Canal", 15000, "Painless nerve treatment that saves your tooth."),
+    ("Whitening", 12000, "Brighten your teeth several shades in a single visit."),
 ]
 
 DOCTORS = [
@@ -59,9 +59,9 @@ DOCTORS = [
 
 def get_db():
     con = sqlite3.connect(DB)
-    con.row_factory = sqlite3.Row  # rows ko naam se access karne ke liye
+    con.row_factory = sqlite3.Row  # access columns by name
     con.execute("PRAGMA foreign_keys = ON")
-    con.executescript(SCHEMA)      # tables na hon to ban jayen
+    con.executescript(SCHEMA)      # create the tables if they are missing
     if con.execute("SELECT COUNT(*) FROM services").fetchone()[0] == 0:
         con.executemany(
             "INSERT INTO services (name, price, info) VALUES (?, ?, ?)", SERVICES
@@ -70,7 +70,7 @@ def get_db():
     return con
 
 
-# ---------------- ICONS / PICTURES (inline SVG: koi image file nahi chahiye) ----------------
+# ---------------- ICONS / PICTURES (inline SVG: no image files needed) ----------------
 ICON_PATHS = {
     "tooth": '<path d="M7 3c-2 0-4 2-4 5 0 3 1 5 2 7 .7 1.5 1 4 2 6 .6 1 2 1 2.4-.5.5-2 1-4 2.6-4s2.1 2 2.6 4c.4 1.5 1.8 1.5 2.4.5 1-2 1.3-4.5 2-6 1-2 2-4 2-7 0-3-2-5-4-5-2 0-3 1-5 1S9 3 7 3z"/>',
     "shield": '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z"/><path d="M8.5 12l2.5 2.5L16 9.5"/>',
@@ -96,7 +96,7 @@ def icon(name):
 
 @app.context_processor
 def helpers():
-    # Ye cheezein saare templates mein khud mil jati hain
+    # These helpers are available in every template
     return dict(icon=icon, svc_icon=lambda n: SERVICE_ICON.get(n, "tooth"),
                 doctors=DOCTORS, money=lambda n: "Rs {:,}".format(n))
 
@@ -256,7 +256,7 @@ footer h4{color:#fff;margin:0 0 10px}
       <div class="fgrid">
         <div>
           <a class="brand" href="{{ url_for('home') }}" style="color:#fff">{{ icon('tooth') }} Smile Dental</a>
-          <p>Aap ki muskurahat hamari zimmedari. Saaf suthra mahol, tajarbakar doctors, aur dard ke baghair ilaaj.</p>
+          <p>Your smile is our responsibility. A clean environment, experienced doctors, and painless treatment.</p>
         </div>
         <div>
           <h4>Quick links</h4>
@@ -274,12 +274,12 @@ footer h4{color:#fff;margin:0 0 10px}
           <p>Mon to Sat: 10am - 8pm</p>
         </div>
       </div>
-      <div class="copy">&copy; 2026 Smile Dental Clinic. Demo project (naam, number aur reviews farzi hain).</div>
+      <div class="copy">&copy; 2026 Smile Dental Clinic. Demo project (names, numbers and reviews are fictional).</div>
     </div>
   </footer>
 
   <script>
-// JavaScript: browser (client) ke andar chalta hai, server par nahi.
+// JavaScript: runs inside the browser (client), not on the server.
 const btn = document.getElementById("menuBtn");
 const nav = document.getElementById("nav");
 btn.addEventListener("click", () => {
@@ -300,7 +300,7 @@ if (service) {
 const date = document.getElementById("date");
 if (date) date.min = new Date().toISOString().split("T")[0];
 
-// scroll karne par sections halke se nazar aate hain
+// sections fade in gently when scrolled into view
 const els = document.querySelectorAll(".fade");
 if ("IntersectionObserver" in window) {
   const io = new IntersectionObserver((list) => list.forEach((e) => {
@@ -319,7 +319,7 @@ if ("IntersectionObserver" in window) {
     <div>
       <p class="eyebrow">Family dental care, Lahore</p>
       <h1>Healthy teeth,<br><span>happy smile.</span></h1>
-      <p class="lead">Checkup se root canal tak, sab ek chhat ke neeche. Online appointment book karein, aur lambi qatar se bachein.</p>
+      <p class="lead">From checkups to root canals, everything under one roof. Book your appointment online and skip the long queue.</p>
       <div class="row">
         <a class="btn" href="{{ url_for('book') }}">Book appointment</a>
         <a class="btn ghost" href="{{ url_for('services') }}">Our services</a>
@@ -330,7 +330,7 @@ if ("IntersectionObserver" in window) {
         <span>{{ icon('check') }} Same-day slots</span>
       </div>
     </div>
-    <svg class="art" viewBox="0 0 400 360" role="img" aria-label="Muskurata hua dant">
+    <svg class="art" viewBox="0 0 400 360" role="img" aria-label="Smiling tooth">
       <circle cx="205" cy="180" r="160" fill="#d9f1ec"/>
       <circle cx="330" cy="70" r="26" fill="#b7e4dc"/>
       <circle cx="68" cy="290" r="18" fill="#b7e4dc"/>
@@ -378,12 +378,12 @@ if ("IntersectionObserver" in window) {
 <section class="alt fade">
   <div class="wrap">
     <p class="eyebrow">Why Smile Dental</p>
-    <h2>Aap hum par bharosa kyun karein</h2>
+    <h2>Why you can trust us</h2>
     <div class="grid">
-      <div class="card"><div class="badge">{{ icon('shield') }}</div><h3>Safe &amp; clean</h3><p>Har mareez ke baad tools sterilise hote hain.</p></div>
-      <div class="card"><div class="badge">{{ icon('heart') }}</div><h3>Gentle care</h3><p>Bachon aur bado, sab ke liye narm ilaaj.</p></div>
-      <div class="card"><div class="badge">{{ icon('clock') }}</div><h3>On time</h3><p>Appointment par aaiye, intezar nahi karna.</p></div>
-      <div class="card"><div class="badge">{{ icon('sparkle') }}</div><h3>Modern tools</h3><p>Naye aalaat se tez aur behtar nateeja.</p></div>
+      <div class="card"><div class="badge">{{ icon('shield') }}</div><h3>Safe &amp; clean</h3><p>Instruments are sterilised after every patient.</p></div>
+      <div class="card"><div class="badge">{{ icon('heart') }}</div><h3>Gentle care</h3><p>Soft, careful treatment for children and adults.</p></div>
+      <div class="card"><div class="badge">{{ icon('clock') }}</div><h3>On time</h3><p>Arrive for your appointment, no long waiting.</p></div>
+      <div class="card"><div class="badge">{{ icon('sparkle') }}</div><h3>Modern tools</h3><p>Newer equipment for faster, better results.</p></div>
     </div>
   </div>
 </section>
@@ -391,11 +391,11 @@ if ("IntersectionObserver" in window) {
 <section class="fade">
   <div class="wrap">
     <p class="eyebrow">How it works</p>
-    <h2>3 aasaan qadam</h2>
+    <h2>3 simple steps</h2>
     <div class="grid steps">
-      <div class="step"><h3>Book online</h3><p>Naam, number aur date likh kar service chunein.</p></div>
-      <div class="step"><h3>Clinic aayein</h3><p>Apne waqt par aayein, doctor aap ka muaina karenge.</p></div>
-      <div class="step"><h3>Muskuraayein</h3><p>Ilaaj ke baad hidayaat milti hain aur follow up bhi.</p></div>
+      <div class="step"><h3>Book online</h3><p>Enter your name, number and date, then choose a service.</p></div>
+      <div class="step"><h3>Visit the clinic</h3><p>Come at your chosen time and the doctor will examine you.</p></div>
+      <div class="step"><h3>Smile</h3><p>You get aftercare advice and a follow-up after treatment.</p></div>
     </div>
   </div>
 </section>
@@ -403,11 +403,11 @@ if ("IntersectionObserver" in window) {
 <section class="alt fade">
   <div class="wrap">
     <p class="eyebrow">Reviews</p>
-    <h2>Mareezon ki raaye</h2>
+    <h2>Patient reviews</h2>
     <div class="grid">
-      <div class="card quote"><div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><p>Root canal ke baare mein dar tha, lekin bilkul dard nahi hua. Bohat shukriya.</p><small>Hamza, Gulberg</small></div>
-      <div class="card quote"><div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><p>Saaf suthri clinic aur staff bohat achha. Bachon ko bhi pasand aayi.</p><small>Maryam, DHA</small></div>
-      <div class="card quote"><div class="stars">&#9733;&#9733;&#9733;&#9733;&#9734;</div><p>Whitening ke baad farq saaf nazar aaya. Online booking bohat asaan thi.</p><small>Talha, Model Town</small></div>
+      <div class="card quote"><div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><p>I was scared of a root canal, but it was completely painless. Thank you so much.</p><small>Hamza, Gulberg</small></div>
+      <div class="card quote"><div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><p>A clean clinic and very friendly staff. My kids liked it too.</p><small>Maryam, DHA</small></div>
+      <div class="card quote"><div class="stars">&#9733;&#9733;&#9733;&#9733;&#9734;</div><p>The difference after whitening was clearly visible. Online booking was very easy.</p><small>Talha, Model Town</small></div>
     </div>
   </div>
 </section>
@@ -415,8 +415,8 @@ if ("IntersectionObserver" in window) {
 <section class="fade">
   <div class="wrap">
     <div class="cta-band">
-      <h2>Apni muskurahat ka khayal rakhein</h2>
-      <p>Aaj hi appointment book karein, 1 minute se kam waqt lagta hai.</p>
+      <h2>Take care of your smile</h2>
+      <p>Book your appointment today. It takes less than a minute.</p>
       <a class="btn" href="{{ url_for('book') }}">Book now</a>
     </div>
   </div>
@@ -432,19 +432,19 @@ if ("IntersectionObserver" in window) {
 <section class="pagehead">
   <div class="wrap">
     <p class="eyebrow">About us</p>
-    <h1 style="font-size:clamp(2rem,5vw,3.2rem);font-weight:800">Hum kaun hain</h1>
-    <p class="lead">Smile Dental 12 saal se Lahore ke khandaanon ki muskurahat ka khayal rakh rahi hai.</p>
+    <h1 style="font-size:clamp(2rem,5vw,3.2rem);font-weight:800">Who we are</h1>
+    <p class="lead">For 12 years, Smile Dental has been caring for the smiles of families across Lahore.</p>
   </div>
 </section>
 
 <section class="fade">
   <div class="wrap split">
     <div>
-      <h2>Hamari kahani</h2>
-      <p>Clinic ki shuruaat ek chhote se kamre se hui. Maqsad ye tha ke dant ka ilaaj mehnga, dara dene wala aur mushkil na ho. Aaj hamare paas 4 maahir doctors aur jadeed aalaat hain, lekin soch wahi hai: mareez pehle.</p>
-      <p>Hum har ilaaj se pehle saaf batate hain ke kya karna hai aur kitna kharch hoga, taake koi hairani na ho.</p>
+      <h2>Our story</h2>
+      <p>The clinic started in one small room. The goal was simple: dental care should not be expensive, scary or complicated. Today we have 4 expert doctors and modern equipment, but our belief is the same: patients come first.</p>
+      <p>Before every treatment we explain clearly what will be done and what it will cost, so there are no surprises.</p>
     </div>
-    <svg viewBox="0 0 400 280" class="art" role="img" aria-label="Clinic ka manzar">
+    <svg viewBox="0 0 400 280" class="art" role="img" aria-label="Clinic illustration">
       <rect width="400" height="280" rx="20" fill="#d9f1ec"/>
       <rect x="40" y="70" width="320" height="170" rx="10" fill="#fff" stroke="#0f766e" stroke-width="3"/>
       <rect x="40" y="70" width="320" height="34" rx="10" fill="#0f766e"/>
@@ -457,11 +457,11 @@ if ("IntersectionObserver" in window) {
 <section class="alt fade">
   <div class="wrap">
     <p class="eyebrow">Our values</p>
-    <h2>Hum kis par chalte hain</h2>
+    <h2>What we stand for</h2>
     <div class="grid">
-      <div class="card"><div class="badge">{{ icon('heart') }}</div><h3>Hamdardi</h3><p>Aap ka dard samajh kar ilaaj karte hain.</p></div>
-      <div class="card"><div class="badge">{{ icon('shield') }}</div><h3>Safai</h3><p>Sterilisation hamari pehli shart hai.</p></div>
-      <div class="card"><div class="badge">{{ icon('check') }}</div><h3>Imaandari</h3><p>Sirf wohi ilaaj jo waqai zaroori ho.</p></div>
+      <div class="card"><div class="badge">{{ icon('heart') }}</div><h3>Compassion</h3><p>We treat you with an understanding of your pain.</p></div>
+      <div class="card"><div class="badge">{{ icon('shield') }}</div><h3>Cleanliness</h3><p>Sterilisation is our first rule.</p></div>
+      <div class="card"><div class="badge">{{ icon('check') }}</div><h3>Honesty</h3><p>Only the treatment that is truly necessary.</p></div>
     </div>
   </div>
 </section>
@@ -469,7 +469,7 @@ if ("IntersectionObserver" in window) {
 <section class="fade">
   <div class="wrap team">
     <p class="eyebrow">Our team</p>
-    <h2>Hamare doctors</h2>
+    <h2>Our doctors</h2>
     <div class="grid">
       {% for name, role, color in doctors %}
       <div class="card">{{ avatar(color) }}<h3>{{ name }}</h3><p>{{ role }}</p></div>
@@ -480,7 +480,7 @@ if ("IntersectionObserver" in window) {
 
 <section class="fade">
   <div class="wrap">
-    <div class="cta-band"><h2>Hum se milein</h2><p>Pehli visit par muaina aur mashwara aasan qeemat par.</p><a class="btn" href="{{ url_for('book') }}">Book now</a></div>
+    <div class="cta-band"><h2>Meet us</h2><p>Your first visit includes an examination and advice at an easy price.</p><a class="btn" href="{{ url_for('book') }}">Book now</a></div>
   </div>
 </section>
 {% endblock %}''',
@@ -491,8 +491,8 @@ if ("IntersectionObserver" in window) {
 <section class="pagehead">
   <div class="wrap">
     <p class="eyebrow">Services</p>
-    <h1 style="font-size:clamp(2rem,5vw,3.2rem);font-weight:800">Hamari khidmaat</h1>
-    <p class="lead">Ye list seedha database ki <b>services</b> table se aa rahi hai.</p>
+    <h1 style="font-size:clamp(2rem,5vw,3.2rem);font-weight:800">Our services</h1>
+    <p class="lead">This list comes straight from the <b>services</b> table in the database.</p>
   </div>
 </section>
 
@@ -515,11 +515,11 @@ if ("IntersectionObserver" in window) {
 <section class="alt fade">
   <div class="wrap">
     <p class="eyebrow">FAQ</p>
-    <h2>Aam sawal</h2>
-    <details><summary>Kya ilaaj mein dard hoga?</summary><p>Ilaaj se pehle numbing di jati hai, is liye aam taur par dard mehsoos nahi hota.</p></details>
-    <details><summary>Daanton ki safai kitne arse baad karwani chahiye?</summary><p>Aam taur par har 6 mahine baad scaling aur checkup behtar hai.</p></details>
-    <details><summary>Kya appointment ke baghair aa sakte hain?</summary><p>Aa sakte hain, lekin appointment lene se intezar nahi karna parta.</p></details>
-    <details><summary>Bachon ka ilaaj hota hai?</summary><p>Ji haan, hamare doctors bachon ke liye narm aur dostana andaaz mein ilaaj karte hain.</p></details>
+    <h2>Common questions</h2>
+    <details><summary>Will the treatment hurt?</summary><p>We numb the area before treatment, so you usually feel no pain.</p></details>
+    <details><summary>How often should I get my teeth cleaned?</summary><p>Scaling and a checkup every 6 months is usually best.</p></details>
+    <details><summary>Can I visit without an appointment?</summary><p>Yes, but booking an appointment means you will not have to wait.</p></details>
+    <details><summary>Do you treat children?</summary><p>Yes, our doctors treat children in a gentle, friendly way.</p></details>
   </div>
 </section>
 {% endblock %}''',
@@ -530,8 +530,8 @@ if ("IntersectionObserver" in window) {
 <section class="pagehead">
   <div class="wrap">
     <p class="eyebrow">Contact</p>
-    <h1 style="font-size:clamp(2rem,5vw,3.2rem);font-weight:800">Humse rabta karein</h1>
-    <p class="lead">Koi sawal hai? Message likhein, hum jald jawab denge.</p>
+    <h1 style="font-size:clamp(2rem,5vw,3.2rem);font-weight:800">Get in touch</h1>
+    <p class="lead">Have a question? Send us a message and we will reply soon.</p>
   </div>
 </section>
 
@@ -541,10 +541,10 @@ if ("IntersectionObserver" in window) {
       <div class="info"><div class="badge">{{ icon('pin') }}</div><div><b>Address</b>Main Boulevard, Gulberg, Lahore</div></div>
       <div class="info"><div class="badge">{{ icon('phone') }}</div><div><b>Phone</b>042-1234 5678</div></div>
       <div class="info"><div class="badge">{{ icon('mail') }}</div><div><b>Email</b>hello@smiledental.example</div></div>
-      <div class="info"><div class="badge">{{ icon('clock') }}</div><div><b>Timing</b>Mon to Sat: 10am - 8pm<br>Sunday: band</div></div>
+      <div class="info"><div class="badge">{{ icon('clock') }}</div><div><b>Timing</b>Mon to Sat: 10am - 8pm<br>Sunday: closed</div></div>
     </div>
     <div>
-      {% if request.args.get('sent') %}<p class="ok">Shukriya! Aap ka message save ho gaya.</p>{% endif %}
+      {% if request.args.get('sent') %}<p class="ok">Thank you! Your message has been saved.</p>{% endif %}
       <form method="post" class="form">
         <label>Name <input name="name" required minlength="2"></label>
         <label>Phone <input name="phone" required pattern="[0-9+ -]{10,15}" placeholder="03xx xxxxxxx"></label>
@@ -562,7 +562,7 @@ if ("IntersectionObserver" in window) {
 <section class="pagehead">
   <div class="wrap">
     <p class="eyebrow">Appointment</p>
-    <h1 style="font-size:clamp(2rem,5vw,3.2rem);font-weight:800">Appointment book karein</h1>
+    <h1 style="font-size:clamp(2rem,5vw,3.2rem);font-weight:800">Book an appointment</h1>
   </div>
 </section>
 <section>
@@ -592,7 +592,7 @@ if ("IntersectionObserver" in window) {
   <div class="wrap">
     <p class="eyebrow">Database</p>
     <h1 style="font-size:clamp(2rem,5vw,3.2rem);font-weight:800">Appointments</h1>
-    <p class="lead">Ye data database ke do tables (appointments aur services) ko JOIN karke aa raha hai.</p>
+    <p class="lead">This data comes from joining two database tables (appointments and services).</p>
   </div>
 </section>
 <section>
@@ -611,7 +611,7 @@ if ("IntersectionObserver" in window) {
     </table>
     </div>
     {% else %}
-    <p>Abhi koi appointment nahi. <a href="{{ url_for('book') }}">Pehli appointment book karein.</a></p>
+    <p>No appointments yet. <a href="{{ url_for('book') }}">Book the first appointment.</a></p>
     {% endif %}
   </div>
 </section>
@@ -656,7 +656,7 @@ def contact():
 @app.route("/book", methods=["GET", "POST"])
 def book():
     con = get_db()
-    if request.method == "POST":           # form submit hua (client -> server request)
+    if request.method == "POST":           # the form was submitted (client -> server request)
         con.execute(
             "INSERT INTO appointments (patient, phone, date, service_id) VALUES (?, ?, ?, ?)",
             (request.form["patient"], request.form["phone"],
@@ -669,7 +669,7 @@ def book():
 
 @app.route("/appointments")
 def appointments():
-    # JOIN: dono tables ko service_id se jodna (relational database ka kamal)
+    # JOIN: combine both tables using service_id (the power of a relational database)
     rows = get_db().execute("""
         SELECT a.id, a.patient, a.phone, a.date, s.name AS service, s.price
         FROM appointments a
@@ -689,7 +689,7 @@ def delete(appt_id):
 
 @app.route("/api/appointments")
 def api_appointments():
-    # JSON format mein data (API): doosri apps/JavaScript yahan se data le sakti hain
+    # Data in JSON format (API): other apps/JavaScript can read data from here
     rows = get_db().execute("SELECT * FROM appointments").fetchall()
     return jsonify([dict(r) for r in rows])
 
@@ -702,7 +702,7 @@ def api_messages():
 
 @app.errorhandler(Exception)
 def show_error(e):
-    # Debugging ke liye: asal error screen par dikhao (kaam ke baad ye hata dein)
+    # For debugging: show the real error on screen (remove this when finished)
     app.logger.exception(e)
     return f"<h1>Error</h1><pre>{type(e).__name__}: {e}</pre>", 500
 
